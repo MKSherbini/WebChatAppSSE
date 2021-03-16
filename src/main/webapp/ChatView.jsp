@@ -14,7 +14,7 @@
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
     <link rel="stylesheet" href="chatStyle.css">
-    <script src="OnlineUsers.js" async></script>
+    <script src="OnlineUserss.js" async></script>
 <%--    <script src="ChatWebSocket.js" async></script>--%>
 </head>
 <body>
