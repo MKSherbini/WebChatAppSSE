@@ -15,7 +15,7 @@
             src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
     <link rel="stylesheet" href="chatStyle.css">
     <script src="OnlineUsers.js" async></script>
-    <script src="ChatWebSocket.js" async></script>
+<%--    <script src="ChatWebSocket.js" async></script>--%>
 </head>
 <body>
 <div class="container-fluid h-100">
@@ -122,32 +122,15 @@
             content: $("#textBox").val(),
             date: new Date(),
             orientation: "Right",
-            isMsg: true,
             gender:'${sessionScope.gender}'
         }
         $("#textBox").val("");
         console.log("#sender"+ message.sender)
         console.log("#orienation"+ message.orientation)
         console.log("sender"+ message.sender)
-        // wSocket.send($("#textBox").val())
-
         wSocket.send(JSON.stringify(message));
     }
 
-    function sendName() {
-        var message = {
-            sender:$("#usernames").text(),
-            content: "hi i am ahmed",
-            date: new Date(),
-            orientation: "Right",
-            isMsg: false,
-            gender:'${sessionScope.gender}'
-        }
-        console.log("sender"+ message.sender)
-        // wSocket.send($("#textBox").val())
-
-        wSocket.send(JSON.stringify(message));
-    }
 </script>
 </body>
 </html>

@@ -5,54 +5,31 @@ eventSource.onopen =openConnection;
 eventSource.onmessage= receiveSSE;
 eventSource.addEventListener("updateMessages",receiveMessage);
 var wSocket;
-
+var working;
+$(document).ready(function () {
+    connectWS();
+    startWorker();
+    console.log("connecting echo")
+})
+function startWorker(){
+    if(typeof (Worker)!=="undefined"){
+        working = new Worker("workerForSSE.js");
+    }
+}
 function connectWS() {
     wSocket= new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/chatApp/echo");
 }
 
-$(document).ready(function () {
-    connectWS();
-    console.log("connecting echo")
-})
+
 
 function receiveMessage (event){
-    var msg = JSON.parse(event.data);
-    let img = "https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg";
-    if (msg.gender == "Female")
-        img = "https://data.whicdn.com/images/295658437/original.jpg";
 
-    if (msg.orientation == 'Right') {
-
-        messagesContainer.innerHTML += '\n' +
-            '                    <div class="d-flex justify-content-end mb-4">\n' +
-            '                        <div class="msg_cotainer_send">\n' +
-            msg.content +
-            '                            <span class="msg_time_send">' + msg.date + '</span>\n' +
-            '                        </div>\n' +
-            '                        <div class="img_cont_msg">\n' +
-            '                            <img id="UserPhoto" src="'+img+'" class="rounded-circle user_img_msg">\n' +
-            '                              <label class="sender">' + msg.sender + '</label>' +
-            '                        </div>\n' +
-            '                    </div>\n'
-        console.log('send' + msg.sender)
-    } else {
-        messagesContainer.innerHTML += '   <div class="d-flex justify-content-start mb-4">\n' +
-            '                        <div class="img_cont_msg">\n' +
-            '                            <img src="'+img+'" class="rounded-circle user_img_msg">\n' +
-            '                              <label class="sender">' + msg.sender + '</label>' +
-            '                        </div>\n' +
-            '                        <div class="msg_cotainer">\n' +
-            msg.content +
-            '                            <span class="msg_time">' + msg.date + '</span>\n' +
-            '                        </div>\n' +
-            '                   </div>\n'
-        console.log('receive' + msg.sender)
-    }
-
-
+    working.postMessage(event);
 
 }
-
+working.onmessage =function (result){
+    messagesContainer +=result.data;
+}
 eventSource.addEventListener("updateOnlineUsers",function (event){
     console.log("Received new Users list")
     var msg = JSON.parse(event.data);
