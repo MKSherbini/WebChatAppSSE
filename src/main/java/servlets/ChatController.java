@@ -17,7 +17,7 @@ import models.User;
 import java.io.IOException;
 import java.util.concurrent.*;
 
-@WebServlet("/server")
+@WebServlet("/SSEChatView")
 public class ChatController extends HttpServlet {
     public static final ConcurrentMap<HttpSession, User> usersMap = new ConcurrentHashMap<>();
     public static final CopyOnWriteArrayList<Message> messages = new CopyOnWriteArrayList<>();
@@ -32,7 +32,7 @@ public class ChatController extends HttpServlet {
         return null;
     }
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/event-stream");
         response.setCharacterEncoding("UTF-8");
 
@@ -43,25 +43,35 @@ public class ChatController extends HttpServlet {
         var username = (String) session.getAttribute("Username");
         var gender = (String) session.getAttribute("Gender");
 
+        boolean changed = false;
         if (lastEventId == null) {
+            changed = true;
             usersMap.put(session, new User(username, gender));
 //            ChatManager.getInstance().add(session, new User((String) session.getAttribute("Username"), (String) session.getAttribute("Gender")));
             lastEventId = "0";
-            writer.write("event: onlineUpdate\n");
+            writer.write("event: updateOnlineUsers\n");
+            System.out.println("event: updateOnlineUsers");
             writer.write("data: " + new Gson().toJson(usersMap.values().toArray()) + "\n\n");
+            System.out.println("data: " + new Gson().toJson(usersMap.values().toArray()));
             System.out.println("liveSession = " + username);
         }
 
-        boolean changed = false;
         for (int i = Integer.parseInt(lastEventId); i < messages.size(); i++) {
             changed = true;
             var msg = messages.get(i);
-            writer.write("event: chatUpdate\n");
+            writer.write("event: updateMessages\n");
             writer.write("data: " + new Gson().toJson(msg) + "\n");
+            System.out.println("event: updateMessages");
+            System.out.println("data: " + new Gson().toJson(msg));
         }
-        if (changed)
+        if (changed) {
             writer.write("id: " + messages.size() + "\n\n");
+            System.out.println("id: " + messages.size());
 
+        }
+
+        writer.flush();
+        writer.close();
     }
 
     public String getServletInfo() {

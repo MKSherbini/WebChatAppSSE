@@ -17,13 +17,18 @@ import models.Message;
 import models.User;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @ServerEndpoint(value = "/echo", configurator = GetHttpSessionConfigurator.class)
 public class EchoServer {
     static int i = 1;
+    public static Map<Session, HttpSession> sessionMap = new HashMap<>();
 
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session, EndpointConfig config) {
+        sessionMap.put(session, (HttpSession) config.getUserProperties()
+                .get(HttpSession.class.getName()));
 //        ChatManager.getInstance().add(session, new User("user" + EchoServer.i, "gender" + EchoServer.i));
 //        EchoServer.i++;
     }
@@ -60,13 +65,13 @@ public class EchoServer {
     }
 
     @OnClose
-    public void onClose(Session session, EndpointConfig config) {
+    public void onClose(Session session) {
 //        ChatManager.getInstance().getUsersMap().remove(session);
 //        ChatManager.getInstance().notifyWithOnline();
 
-        var killSession = (HttpSession) config.getUserProperties()
-                .get(HttpSession.class.getName());
+        var killSession = sessionMap.get(session);
         ChatController.usersMap.remove(killSession);
+        sessionMap.remove(session);
         System.out.println("killSession = " + killSession.getAttribute("Username"));
     }
 
